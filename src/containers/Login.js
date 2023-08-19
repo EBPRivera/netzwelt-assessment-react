@@ -1,15 +1,84 @@
-import { Container } from "react-bootstrap";
+import _ from "lodash";
+import { useState } from "react";
+import { Container, Row, Alert } from "react-bootstrap";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
+import useAxiosInstance from "../hooks/useAxiosInstance";
 import LoginForm from "../components/LoginForm";
+import { login } from "../features/user";
+
+const INIT_PARAMS = {
+  username: "",
+  password: "",
+};
 
 const Login = () => {
-  const handleLogin = (params) => {
-    console.log(params);
+  const [params, setParams] = useState(INIT_PARAMS);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState([]);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const axiosInstance = useAxiosInstance();
+
+  const handleLogin = async () => {
+    setIsLoading(true);
+
+    await axiosInstance
+      .post("/account/signin", params)
+      .then((response) => {
+        if (_.isUndefined(response.data.roles)) {
+          setErrors(_.map(response.data, (val) => val));
+        } else {
+          dispatch(login(response.data));
+          navigate("/");
+        }
+      })
+      .catch((e) => {
+        setErrors([e.message]);
+      });
+
+    setIsLoading(false);
+  };
+
+  const handleChangeParam = (key, val) => {
+    setParams((params) => ({ ...params, [key]: val }));
+  };
+
+  const handleCloseAlert = (message) => {
+    setErrors((errors) => _.remove(errors, (val) => val === message));
+  };
+
+  const renderErrors = () => {
+    return (
+      <Row>
+        {_.map(errors, (error, key) => {
+          return (
+            <Alert
+              key={key}
+              variant="danger"
+              dismissible
+              onClose={() => handleCloseAlert(error)}
+            >
+              {error}
+            </Alert>
+          );
+        })}
+      </Row>
+    );
   };
 
   return (
-    <Container md={3} className="d-flex justify-content-center pt-3">
-      <LoginForm onSubmit={handleLogin} />
+    <Container md={3} className="pt-3">
+      {!_.isEmpty(errors) && renderErrors()}
+      <Row className="d-flex justify-content-center">
+        <LoginForm
+          isLoading={isLoading}
+          onSubmit={handleLogin}
+          onChangeParam={handleChangeParam}
+          params={params}
+        />
+      </Row>
     </Container>
   );
 };

@@ -1,19 +1,9 @@
-import { useState } from "react";
+import { Card, Form, Button, Spinner } from "react-bootstrap";
 
-import { Card, Form } from "react-bootstrap";
-
-const INIT_PARAMS = {
-  username: "",
-  password: "",
-};
-
-const LoginForm = (onSubmit) => {
-  const params = useState(INIT_PARAMS);
-
+const LoginForm = ({ isLoading, onSubmit, onChangeParam, params }) => {
   const handleLogin = (e) => {
     e.preventDefault();
-    console.log(e);
-    onSubmit(params);
+    onSubmit();
   };
 
   return (
@@ -22,12 +12,23 @@ const LoginForm = (onSubmit) => {
       <Form onSubmit={handleLogin}>
         <Form.Group>
           <Form.Label>Username</Form.Label>
-          <Form.Control type="text" />
+          <Form.Control
+            type="text"
+            value={params.username}
+            onChange={(e) => onChangeParam("username", e.target.value)}
+          />
         </Form.Group>
         <Form.Group>
           <Form.Label>Password</Form.Label>
-          <Form.Control type="password" />
+          <Form.Control
+            type="password"
+            value={params.password}
+            onChange={(e) => onChangeParam("password", e.target.value)}
+          />
         </Form.Group>
+        <Button className="mt-3" disabled={isLoading} type="submit">
+          {isLoading ? <Spinner as="span" size="sm" /> : "Submit"}
+        </Button>
       </Form>
     </Card>
   );
