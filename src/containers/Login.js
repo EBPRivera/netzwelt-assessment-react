@@ -1,11 +1,12 @@
 import _ from "lodash";
 import { useState } from "react";
-import { Container, Row, Alert } from "react-bootstrap";
+import { Container, Row } from "react-bootstrap";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 import useAxiosInstance from "../hooks/useAxiosInstance";
 import LoginForm from "../components/LoginForm";
+import Errors from "../components/Errors";
 import { login } from "../features/user";
 
 const INIT_PARAMS = {
@@ -45,25 +46,16 @@ const Login = () => {
     setParams((params) => ({ ...params, [key]: val }));
   };
 
-  const handleCloseAlert = (message) => {
-    setErrors((errors) => _.remove(errors, (val) => val === message));
+  const handleCloseAlert = (key) => {
+    setErrors((errors) =>
+      _.remove(errors, (error, index) => _.isEqual(key, index))
+    );
   };
 
   const renderErrors = () => {
     return (
       <Row>
-        {_.map(errors, (error, key) => {
-          return (
-            <Alert
-              key={key}
-              variant="danger"
-              dismissible
-              onClose={() => handleCloseAlert(error)}
-            >
-              {error}
-            </Alert>
-          );
-        })}
+        <Errors errors={errors} onClose={handleCloseAlert} />
       </Row>
     );
   };
