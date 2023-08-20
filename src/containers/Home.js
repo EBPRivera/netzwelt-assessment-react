@@ -1,17 +1,17 @@
 import _ from "lodash";
 import { useEffect, useState } from "react";
 import { Container, Row } from "react-bootstrap";
-import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 import useAxiosInstance from "../hooks/useAxiosInstance";
+import useAuthorized from "../hooks/useAuthorized";
 import parseTerritories from "../helpers/parseTerritories";
 import Errors from "../components/Errors";
 
 const Home = () => {
   const [errors, setErrors] = useState([]);
   const [territories, setTerritories] = useState([]);
-  const user = useSelector((state) => state.user);
+  const isAuthorized = useAuthorized();
   const navigate = useNavigate();
   const axiosInstance = useAxiosInstance();
 
@@ -27,7 +27,7 @@ const Home = () => {
         });
     };
 
-    if (_.isUndefined(user.roles) || _.isEmpty(user.roles)) {
+    if (!isAuthorized) {
       navigate("/account/login");
     } else {
       fetchTerritories();
