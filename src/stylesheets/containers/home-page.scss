@@ -1,0 +1,12 @@
+#home-page {
+  .territories {
+    > ul > li:not(:first-child) {
+      padding-top: 1rem;
+    }
+
+    > ul > li:not(:last-child) {
+      border-bottom: 1px solid var(--bs-secondary-border-subtle);
+      padding-bottom: 1rem;
+    }
+  }
+}
