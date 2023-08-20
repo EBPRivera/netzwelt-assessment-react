@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { useEffect, useState } from "react";
-import { Container, Row } from "react-bootstrap";
+import { Container, Row, Spinner, Alert, Card } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
 import useAxiosInstance from "../hooks/useAxiosInstance";
@@ -11,12 +11,15 @@ import Errors from "../components/Errors";
 const Home = () => {
   const [errors, setErrors] = useState([]);
   const [territories, setTerritories] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const isAuthorized = useAuthorized();
   const navigate = useNavigate();
   const axiosInstance = useAxiosInstance();
 
   useEffect(() => {
     const fetchTerritories = async () => {
+      setIsLoading(true);
+
       await axiosInstance
         .get("/territories/all")
         .then((response) => {
@@ -25,6 +28,8 @@ const Home = () => {
         .catch((e) => {
           setErrors([e.message]);
         });
+
+      setIsLoading(false);
     };
 
     if (!isAuthorized) {
@@ -52,6 +57,15 @@ const Home = () => {
     );
   };
 
+  const renderLoading = () => {
+    return (
+      <Alert variant="warning">
+        <span>Fetching Data </span>
+        <Spinner as="span" size="sm" />
+      </Alert>
+    );
+  };
+
   const renderTerritories = (territories) => {
     if (_.isEmpty(territories)) return;
 
@@ -70,9 +84,14 @@ const Home = () => {
   };
 
   return (
-    <Container className="text-center pt-3">
+    <Container className="text-center pt-3" id="home-page">
       {renderErrors()}
-      <Row className="text-start">{renderTerritories(territories)}</Row>
+      {isLoading && renderLoading()}
+      {!_.isEmpty(territories) && (
+        <Row as={Card} className="text-start territories p-3">
+          {renderTerritories(territories)}
+        </Row>
+      )}
     </Container>
   );
 };
